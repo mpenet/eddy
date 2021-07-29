@@ -1,0 +1,12 @@
+{:deps {org.clojure/clojure {:mvn/version "1.10.2"}
+        org.eclipse.jetty/jetty-server {:mvn/version "11.0.6"}
+        org.eclipse.jetty.http2/http2-server {:mvn/version "11.0.6"}
+        org.eclipse.jetty/jetty-alpn-server {:mvn/version "11.0.6"}
+        exoscale/interceptor {:mvn/version "0.1.9"}
+        cc.qbits/auspex {:mvn/version "1.0.0-alpha7"}
+        ring/ring-core {:mvn/version "1.9.4"}}
+
+ :paths ["src"]
+
+ :aliases {:build {:deps {io.github.clojure/tools.build {:sha "98c1e8eb3ae2c2477136084be5636b61f38738f7"}}
+                   :ns-default build}}}
