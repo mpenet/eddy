@@ -15,4 +15,4 @@ jobs:
           cli: 1.10.3.905
 
       - name: Test
-        run: clojure -X:dev
+        run: clojure -X:test
