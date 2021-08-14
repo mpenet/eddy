@@ -10,7 +10,7 @@
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:sha "98c1e8eb3ae2c2477136084be5636b61f38738f7"}}
                    :ns-default build}
-           :dev
+           :test
            {:extra-paths ["test"]
             :extra-deps {org.clojure/test.check {:mvn/version "1.1.0"}
                          io.github.cognitect-labs/test-runner

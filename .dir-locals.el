@@ -1,1 +1,1 @@
-((nil . ((cider-clojure-cli-aliases . "-A:dev"))))
+((nil . ((cider-clojure-cli-aliases . "-A:test"))))
