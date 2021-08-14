@@ -3,8 +3,18 @@
         org.eclipse.jetty.http2/http2-server {:mvn/version "11.0.6"}
         org.eclipse.jetty/jetty-alpn-server {:mvn/version "11.0.6"}
         exoscale/interceptor {:mvn/version "0.1.9"}
-        cc.qbits/auspex {:mvn/version "1.0.0-alpha7"}}
+        cc.qbits/auspex {:mvn/version "1.0.0-alpha7"}
+        org.clojure/tools.logging {:mvn/version "1.1.0"}}
+
  :paths ["src"]
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:sha "98c1e8eb3ae2c2477136084be5636b61f38738f7"}}
-                   :ns-default build}}}
+                   :ns-default build}
+           :dev
+           {:extra-paths ["test"]
+            :extra-deps {org.clojure/test.check {:mvn/version "1.1.0"}
+                         io.github.cognitect-labs/test-runner
+                         {:git/url "https://github.com/cognitect-labs/test-runner"
+                          :sha "62ef1de18e076903374306060ac0e8a752e57c86"}
+                         clj-http/clj-http {:mvn/version "3.12.3"}}
+            :exec-fn cognitect.test-runner.api/test}}}

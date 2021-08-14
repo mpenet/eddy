@@ -29,7 +29,8 @@
 
 (defprotocol Response
   (set-status! [response status])
-  (set-headers! [response headers]))
+  (set-headers! [response headers])
+  (send-error! [response ^Throwable error]))
 
 (defprotocol BodyWriter
   (set-body! [response body]))

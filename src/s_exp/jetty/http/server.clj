@@ -2,7 +2,8 @@
   (:require [exoscale.interceptor :as interceptor]
             [exoscale.interceptor.auspex]
             [s-exp.jetty.http.interceptor.ring1 :as ring1]
-            [s-exp.jetty.http.server.protocols :as p])
+            [s-exp.jetty.http.server.protocols :as p]
+            [clojure.tools.logging :as log])
 
   (:import
    (jakarta.servlet.http HttpServletResponse
@@ -51,51 +52,43 @@
    #:s-exp.jetty.ssl-context-factory{}))
 
 (defn initial-context
-  [ctx servlet-request servlet-response]
+  [ctx request response]
   (into ctx
-        #:s-exp.jetty.http.server{:request servlet-request
-                                  :response servlet-response}))
-
-(defn- send-error!
-  [^HttpServletResponse servlet-response ^Throwable e]
-  (.sendError servlet-response 500 (ex-message e)))
+        #:s-exp.jetty.http.server{:request request
+                                  :response response}))
 
 (defn create-handler
   [f]
   (proxy [AbstractHandler] []
     (handle [target
-             ^Request _request
-             ^HttpServletRequest servlet-request
-             ^HttpServletResponse servlet-response]
-      (f target
-         servlet-request
-         servlet-response))))
+             ^Request _
+             ^Request request
+             ^Response response]
+      (f target request response))))
 
 (defn handler
   [{:as _opts
     :s-exp.jetty.http.server.interceptor/keys [chain ctx]}]
   (create-handler
    (fn [_
-        ^Request servlet-request
-        ^Response servlet-response]
+        ^Request request
+        ^Response response]
      (try
        (-> (initial-context ctx
-                            servlet-request
-                            servlet-response)
+                            request
+                            response)
            (interceptor/execute chain))
        (catch Throwable e
-         (binding [*out* *err*]
-           (println e))
-         (send-error! servlet-response e))
+         (log/error e "Error handling request")
+         (p/send-error! response e))
        (finally
-         (p/set-handled! servlet-request true))))))
+         (p/set-handled! request true))))))
 
 (defn- create-threadpool
   ^ThreadPool
   [{:s-exp.jetty.http.server.threadpool/keys [max-threads min-threads
                                               idle-timeout daemon?
                                               max-queued-requests]}]
-
   (let [queue-max-capacity (max max-queued-requests 8)
         queue-capacity (min (max min-threads 8)
                             queue-max-capacity)

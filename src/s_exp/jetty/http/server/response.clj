@@ -27,6 +27,9 @@
                     val-or-vals)))
           headers))
 
+  (send-error! [response e]
+    (.sendError response 500 (ex-message e)))
+
   p/BodyWriter
   (set-body! [response body]
     (p/write-body! body response))

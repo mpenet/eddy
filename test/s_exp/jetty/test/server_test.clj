@@ -38,7 +38,6 @@
                 {:ring1/handler (fn [request] {:status 201})}}
     (is (-> (http/get "http://localhost:8080") :status (= 201)))))
 
-
 (deftest test-simple-post-req
   (with-server {:s-exp.jetty.http.server/join? false
                 :s-exp.jetty.http.server.interceptor/ctx
