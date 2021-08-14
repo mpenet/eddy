@@ -15,7 +15,8 @@
   (character-encoding [request])
   (ssl-client-cert [request])
 
-  (complete! [request]))
+  (complete! [request])
+  (set-handled! [request handled?]))
 
 (defprotocol BodyReader
   (read-body [request]))
@@ -35,6 +36,12 @@
 
 (defprotocol BodyWriterAsync
   (set-body-async! [response body]))
+
+(defprotocol WriteListener
+  (set-write-listener! [response listener]))
+
+(defprotocol ReadListener
+  (set-read-listener! [request listener]))
 
 (defprotocol WriteBody
   (write-body! [body response]))

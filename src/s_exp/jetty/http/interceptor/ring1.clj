@@ -73,7 +73,7 @@
 
 (def handle-request
   {:name ::handle-request
-   :enter (-> (fn [{:as _ctx :ring1/keys [handler request]}]
+   :enter (-> (fn [{:as ctx :ring1/keys [handler request]}]
                 (handler request))
               (ix/out [:ring1/response]))})
 
@@ -87,8 +87,7 @@
 (def init-request
   {:leave (fn [{:as ctx
                 :s-exp.jetty.http.server/keys [^Request request]}]
-            (p/complete! request)
-            ctx)
+            (p/complete! request))
    :error (fn [{:s-exp.jetty.http.server/keys [^Request request]}
                e]
             (print e)

@@ -46,9 +46,15 @@
   (complete! [request]
     (when (p/async-started? request)
       (.complete ^AsyncContext (p/async-context request))))
+  (set-handled! [request handled?]
+    (.setHandled request handled?))
 
   p/BodyReader
   (read-body [request] (.getInputStream request))
+
+  p/ReadListener
+  (set-read-listener! [request listener]
+    (-> request (.getInputStream) (.setReadListener listener)))
 
   p/AsyncContext
   (async-supported? [request] (.isAsyncSupported request))

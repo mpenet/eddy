@@ -33,7 +33,10 @@
 
   p/BodyWriterAsync
   (set-body-async! [response body]
-    (p/write-body-async! body response)))
+    (p/write-body-async! body response))
+
+  (set-write-listener! [response listener]
+    (-> response (.getOutputStream) (.setWriteListener listener))))
 
 (extend-protocol p/WriteBody
 
@@ -77,10 +80,8 @@
 
   InputStream
   (write-body! [ios ^Response response]
-    (let [output-stream (.getOutputStream response)]
-      (with-open [ios ios]
-        (io/copy ios output-stream))
-      (.close output-stream)))
+    (.sendContent ^HttpOutput (.getHttpOutput response)
+                  ios))
 
   clojure.lang.ISeq
   (write-body! [xs ^Response response]
@@ -133,5 +134,8 @@
                          response))
 
   nil
-  (write-body-async! [s response]
-    (ax/success-future nil)))
+  (write-body-async! [_ ^Response response]
+    (let [cf ^CompletableFuture (ax/future)]
+      (.complete ^HttpOutput (.getHttpOutput response)
+                 ^Callback (Callback/from cf))
+      cf)))

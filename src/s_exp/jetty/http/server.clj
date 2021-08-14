@@ -2,23 +2,21 @@
   (:require [exoscale.interceptor :as interceptor]
             [exoscale.interceptor.auspex]
             [s-exp.jetty.http.interceptor.ring1 :as ring1]
-            [s-exp.jetty.http.server.protocols :as p]
-            [qbits.auspex :as ax])
+            [s-exp.jetty.http.server.protocols :as p])
 
   (:import
-   (jakarta.servlet AsyncContext)
    (jakarta.servlet.http HttpServletResponse
                          HttpServletRequest)
-   (org.eclipse.jetty.server Request
-                             Server
-                             Request
-                             HttpConnectionFactory
-                             SslConnectionFactory
-                             SecureRequestCustomizer
-                             ServerConnector
-                             HttpConfiguration
-                             HttpConnectionFactory
-                             ConnectionFactory)
+   (org.eclipse.jetty.server  Server
+                              Request
+                              Response
+                              HttpConnectionFactory
+                              SslConnectionFactory
+                              SecureRequestCustomizer
+                              ServerConnector
+                              HttpConfiguration
+                              HttpConnectionFactory
+                              ConnectionFactory)
    (org.eclipse.jetty.alpn.server ALPNServerConnectionFactory)
    (org.eclipse.jetty.http2.server HTTP2CServerConnectionFactory HTTP2ServerConnectionFactory)
    (org.eclipse.jetty.server.handler AbstractHandler)
@@ -53,10 +51,9 @@
    #:s-exp.jetty.ssl-context-factory{}))
 
 (defn initial-context
-  [ctx base-request servlet-request servlet-response]
+  [ctx servlet-request servlet-response]
   (into ctx
-        #:s-exp.jetty.http.server{:base-request base-request
-                                  :request servlet-request
+        #:s-exp.jetty.http.server{:request servlet-request
                                   :response servlet-response}))
 
 (defn- send-error!
@@ -67,11 +64,10 @@
   [f]
   (proxy [AbstractHandler] []
     (handle [target
-             ^Request request
+             ^Request _request
              ^HttpServletRequest servlet-request
              ^HttpServletResponse servlet-response]
       (f target
-         request
          servlet-request
          servlet-response))))
 
@@ -79,23 +75,20 @@
   [{:as _opts
     :s-exp.jetty.http.server.interceptor/keys [chain ctx]}]
   (create-handler
-   (fn [_target
-        ^Request request
-        ^HttpServletRequest servlet-request
-        ^HttpServletResponse servlet-response]
+   (fn [_
+        ^Request servlet-request
+        ^Response servlet-response]
      (try
        (-> (initial-context ctx
-                            request
                             servlet-request
                             servlet-response)
            (interceptor/execute chain))
        (catch Throwable e
-         (prn e)
+         (binding [*out* *err*]
+           (println e))
          (send-error! servlet-response e))
        (finally
-         (.setHandled request true))))))
-
-
+         (p/set-handled! servlet-request true))))))
 
 (defn- create-threadpool
   ^ThreadPool
@@ -225,7 +218,7 @@
       (.addConnector server (ssl-connector server opts)))
     server))
 
-(defn run
+(defn start!
   ^Server
   [opts]
   (let [{:as opts
@@ -240,41 +233,8 @@
       (.join server))
     server))
 
-(def response {:status 200 :body ""})
-
-;; (def s (run {:s-exp.jetty.http.server/join? false
-;;              :s-exp.jetty.http.server.threadpool/max-threads 10
-;;              :s-exp.jetty.http.server.threadpool/min-threads 10
-;;              :s-exp.jetty.http.server.interceptor/chain ring1/async-chain
-;;              :s-exp.jetty.http.server.interceptor/ctx
-;;              {:ring1/handler (fn [request] (ax/success-future response))}}))
-
-(def s (run {:s-exp.jetty.http.server/join? false
-             :s-exp.jetty.http.server.threadpool/max-threads 10
-             :s-exp.jetty.http.server.threadpool/min-threads 10
-             :s-exp.jetty.http.server.interceptor/chain ring1/chain
-             :s-exp.jetty.http.server.interceptor/ctx
-             {:ring1/handler (fn [request] response)}}))
-
-;; (def s (run {:s-exp.jetty.http.server/join? false
-;;              :s-exp.jetty.http.server.threadpool/max-threads 50
-;;              :s-exp.jetty.http.server.threadpool/min-threads 50
-;;              :s-exp.jetty.http.server/handler
-;;              (fn [opts]
-;;                (create-handler (fn [_ ^Request request ^HttpServletRequest s-request ^HttpServletResponse  s-response]
-;;                                  (.setStatus s-response 200)
-;;                                  (.setHandled request true))))}))
-
-;; (def s (run {:s-exp.jetty.http.server/join? false
-;;              :s-exp.jetty.http.server.threadpool/max-threads 50
-;;              :s-exp.jetty.http.server.threadpool/min-threads 50
-;;              :s-exp.jetty.http.server/handler
-;;              (fn [opts]
-;;                (create-handler (fn [_ ^Request request ^HttpServletRequest
-;;                                     s-request ^HttpServletResponse  s-response]
-
-;;                                  (p/set-status! s-response 200)
-;;                                  (.setHandled request true))))}))
-
-
-(.stop s)
+(defn stop!
+  ^Server
+  [^Server server]
+  (doto server
+    (.stop)))
