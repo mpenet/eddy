@@ -9,7 +9,7 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v1
 
-      - name: Install leiningen
+      - name: Install clojure cli
         uses: DeLaGuardo/setup-clojure@master
         with:
           cli: 1.10.3.905
