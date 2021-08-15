@@ -9,6 +9,7 @@ Jetty11+ server library (client support might eventually be added later).
 * NIO reading/writing
 * sync or async handler base
 * optional support for HTTP-2
+* quite minimal codebase
 
 [wip]
 
