@@ -6,7 +6,7 @@
 
 ## Installation
 
-jetty is [available on Clojars](https://clojars.org/s-exp/jetty).
+jetty is [available on Clojars](https://clojars.org/s-exp/loch).
 
 Add this to your dependencies:
 

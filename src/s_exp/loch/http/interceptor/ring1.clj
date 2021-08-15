@@ -1,10 +1,10 @@
-(ns s-exp.jetty.http.interceptor.ring1
+(ns s-exp.loch.http.interceptor.ring1
   "adapted/taken from ring.util.servlet"
   (:require
-   [s-exp.jetty.http.server.request :as request]
-   [s-exp.jetty.http.server.response :as response]
+   [s-exp.loch.http.server.request :as request]
+   [s-exp.loch.http.server.response :as response]
    [exoscale.interceptor :as ix]
-   [s-exp.jetty.http.interceptor.ring1 :as ring1]
+   [s-exp.loch.http.interceptor.ring1 :as ring1]
    [qbits.auspex :as ax])
   (:import (org.eclipse.jetty.server Request Response)
            (jakarta.servlet AsyncContext)))
@@ -14,7 +14,7 @@
 (def read-headers
   {:name ::read-request
    :enter
-   (fn [{:as ctx :s-exp.jetty.http.server/keys [^Request request]}]
+   (fn [{:as ctx :s-exp.loch.http.server/keys [^Request request]}]
      (assoc ctx
             :ring1/request
             {:server-port (request/server-port request)
@@ -33,13 +33,13 @@
 
 (def read-body
   {:name ::read-body-sync
-   :enter (fn [{:as ctx :s-exp.jetty.http.server/keys [^Request request]}]
+   :enter (fn [{:as ctx :s-exp.loch.http.server/keys [^Request request]}]
             (assoc-in ctx [:ring1/request :body] (.getInputStream request)))})
 
 (def write-headers
   {:name ::write-response
    :enter (fn [{:as ctx
-                :s-exp.jetty.http.server/keys [^Response response]}]
+                :s-exp.loch.http.server/keys [^Response response]}]
             (let [{:keys [status headers]} (:ring1/response ctx)]
 
               (when (nil? response)
@@ -59,14 +59,14 @@
 (def write-body
   {:name ::write-body
    :enter (fn [{:as ctx
-                :s-exp.jetty.http.server/keys [^Response response]}]
+                :s-exp.loch.http.server/keys [^Response response]}]
             (response/set-body! response (-> ctx :ring1/response :body))
             ctx)})
 
 (def write-body-async
   {:name ::write-body-async
    :enter (fn [{:as ctx
-                :s-exp.jetty.http.server/keys [^Response response]}]
+                :s-exp.loch.http.server/keys [^Response response]}]
             (ax/then (response/set-body-async! response (-> ctx :ring1/response :body))
                      (fn [_] ctx)))})
 
@@ -85,9 +85,9 @@
 
 (def init-request
   {:leave (fn [{:as ctx
-                :s-exp.jetty.http.server/keys [^Request request]}]
+                :s-exp.loch.http.server/keys [^Request request]}]
             (request/complete! request))
-   :error (fn [{:s-exp.jetty.http.server/keys [^Request request]}
+   :error (fn [{:s-exp.loch.http.server/keys [^Request request]}
                e]
             (print e)
             (request/complete! request)
@@ -95,8 +95,8 @@
 
 (def init-request-async
   {:enter (fn [{:as ctx
-                :s-exp.jetty.http.server/keys [^Request request
-                                               async-timeout]}]
+                :s-exp.loch.http.server/keys [^Request request
+                                              async-timeout]}]
             (let [async-ctx (request/start-async request)]
               (when async-timeout
                 (.setTimeout ^AsyncContext async-ctx async-timeout)))

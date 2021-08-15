@@ -1,9 +1,9 @@
-(ns s-exp.jetty.http.server
+(ns s-exp.loch.http.server
   (:require [exoscale.interceptor :as interceptor]
             [exoscale.interceptor.auspex]
-            [s-exp.jetty.http.interceptor.ring1 :as ring1]
-            [s-exp.jetty.http.server.request :as request]
-            [s-exp.jetty.http.server.response :as response]
+            [s-exp.loch.http.interceptor.ring1 :as ring1]
+            [s-exp.loch.http.server.request :as request]
+            [s-exp.loch.http.server.response :as response]
             [clojure.tools.logging :as log])
 
   (:import
@@ -32,30 +32,30 @@
 
 (def default-opts
   (merge
-   #:s-exp.jetty.http.server{:join? true}
-   #:s-exp.jetty.http.server.interceptor{:chain ring1/chain
+   #:s-exp.loch.http.server{:join? true}
+   #:s-exp.loch.http.server.interceptor{:chain ring1/chain
                                          :ctx {}}
-   #:s-exp.jetty.http.server.threadpool{:daemon? false
+   #:s-exp.loch.http.server.threadpool{:daemon? false
                                         :max-threads 50
                                         :min-threads 8
                                         :max-queued-requests Integer/MAX_VALUE
                                         :idle-timeout 60000}
-   #:s-exp.jetty.http.server.http-config{:secure-scheme "https"
+   #:s-exp.loch.http.server.http-config{:secure-scheme "https"
                                          :output-buffer-size 32768
                                          :request-header-size 8192
                                          :response-header-size 8192
                                          :send-server-version? false
                                          :send-date-header? false
                                          :header-cache-size 512}
-   #:s-exp.jetty.http.server.http-connector{:port 8080
+   #:s-exp.loch.http.server.http-connector{:port 8080
                                             :max-idle-time 200000}
-   #:s-exp.jetty.http.server.ssl-connector{:max-idle-time 200000}
-   #:s-exp.jetty.ssl-context-factory{}))
+   #:s-exp.loch.http.server.ssl-connector{:max-idle-time 200000}
+   #:s-exp.loch.ssl-context-factory{}))
 
 (defn initial-context
   [ctx request response]
   (into ctx
-        #:s-exp.jetty.http.server{:request request
+        #:s-exp.loch.http.server{:request request
                                   :response response}))
 
 (defn create-handler
@@ -69,7 +69,7 @@
 
 (defn handler
   [{:as _opts
-    :s-exp.jetty.http.server.interceptor/keys [chain ctx]}]
+    :s-exp.loch.http.server.interceptor/keys [chain ctx]}]
   (create-handler
    (fn [_
         ^Request request
@@ -87,7 +87,7 @@
 
 (defn- create-threadpool
   ^ThreadPool
-  [{:s-exp.jetty.http.server.threadpool/keys [max-threads min-threads
+  [{:s-exp.loch.http.server.threadpool/keys [max-threads min-threads
                                               idle-timeout daemon?
                                               max-queued-requests]}]
   (let [queue-max-capacity (max max-queued-requests 8)
@@ -106,7 +106,7 @@
 
 (defn- http-config
   ^HttpConfiguration
-  [{:s-exp.jetty.http.server.http-config/keys
+  [{:s-exp.loch.http.server.http-config/keys
     [output-buffer-size request-header-size response-header-size
      send-server-version? send-date-header?
      header-cache-size]}]
@@ -120,7 +120,7 @@
 
 (defn- ssl-context-factory
   ^SslContextFactory$Server
-  [{:s-exp.jetty.ssl-context-factory/keys
+  [{:s-exp.loch.ssl-context-factory/keys
     [keystore keystore-type key-password client-auth  truststore trust-password
      exclude-ciphers replace-exclude-ciphers? exclude-protocols
      replace-exclude-protocols? ssl-context]}]
@@ -166,8 +166,8 @@
 (defn- ^ServerConnector ssl-connector
   [^Server server
    {:as opts
-    :s-exp.jetty.http.server.ssl-connector/keys [host port keystore-scan-interval
-                                                 max-idle-time http2?]}]
+    :s-exp.loch.http.server.ssl-connector/keys [host port keystore-scan-interval
+                                                max-idle-time http2?]}]
   (let [http-cfg (http-config opts)
         http-factory (HttpConnectionFactory.
                       (doto http-cfg
@@ -191,7 +191,7 @@
 
 (defn- http-connector
   ^ServerConnector
-  [server {:s-exp.jetty.http.server.http-connector/keys [host port max-idle-time http2?]
+  [server {:s-exp.loch.http.server.http-connector/keys [host port max-idle-time http2?]
            :as opts}]
   (let [http-cfg (http-config opts)
         connection-factories (cond-> [(HttpConnectionFactory. http-cfg)]
@@ -206,9 +206,9 @@
   ^Server
   [{:as opts}]
   (let [server (Server. (create-threadpool opts))]
-    (when (:s-exp.jetty.http.server.http-connector/port opts)
+    (when (:s-exp.loch.http.server.http-connector/port opts)
       (.addConnector server (http-connector server opts)))
-    (when (:s-exp.jetty.http.server.ssl-connector/port opts)
+    (when (:s-exp.loch.http.server.ssl-connector/port opts)
       (.addConnector server (ssl-connector server opts)))
     server))
 
@@ -216,7 +216,7 @@
   ^Server
   [opts]
   (let [{:as opts
-         :s-exp.jetty.http.server/keys [configurator join? handler]
+         :s-exp.loch.http.server/keys [configurator join? handler]
          :or {handler handler}} (merge default-opts opts)
         server (create-server opts)]
     (.setHandler server (handler opts))

@@ -1,4 +1,4 @@
-(ns s-exp.jetty.utils
+(ns s-exp.loch.utils
   (:import
    (java.util Iterator Enumeration)
    (clojure.lang IReduceInit)))

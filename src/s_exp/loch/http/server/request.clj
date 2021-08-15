@@ -1,5 +1,5 @@
-(ns s-exp.jetty.http.server.request
-  (:require [s-exp.jetty.utils :as u])
+(ns s-exp.loch.http.server.request
+  (:require [s-exp.loch.utils :as u])
   (:import (jakarta.servlet.http HttpServletRequest)
            (org.eclipse.jetty.server Request)
            (jakarta.servlet AsyncContext)))
