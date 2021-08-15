@@ -1,17 +1,21 @@
 # loch
 
-Yet another clojure / jetty library
+Jetty11+ server library (client support might eventually be added later).
+
+* builds on protocols for request/response handling (no ring by default, fast)
+* can run Handlers via an [exoscale/interceptor](https://github.com/exoscale/interceptor) chain
+* provides an interceptor chain for RING (v1) handlers
+* async input/output via CompletableFuture
+* NIO reading/writing
+* sync or async handler base
+* optional support for HTTP-2
 
 [wip]
 
 ## Documentation
 
 ## Installation
-
-jetty is [available on Clojars](https://clojars.org/s-exp/loch).
-
-Add this to your dependencies:
-
+<!-- loch is [available on Clojars](https://clojars.org/s-exp/loch). -->
 
 ## License
 
