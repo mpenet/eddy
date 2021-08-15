@@ -3,7 +3,7 @@
 Jetty11+ server library (client support might eventually be added later).
 
 * builds on protocols for request/response handling (no ring by default, fast)
-* can run Handlers via an [exoscale/interceptor](https://github.com/exoscale/interceptor) chain
+* can run Handlers via an [exoscale/interceptor](https://github.com/exoscale/interceptor) chain, meaning you can skip any request/response handling phase, at "config time" or "request time", less is more
 * provides an interceptor chain for RING (v1) handlers
 * async input/output via CompletableFuture
 * NIO reading/writing
