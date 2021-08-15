@@ -1,9 +1,38 @@
 (ns s-exp.jetty.http.server.request
-  (:require [s-exp.jetty.http.server.protocols :as p]
-            [s-exp.jetty.utils :as u])
+  (:require [s-exp.jetty.utils :as u])
   (:import (jakarta.servlet.http HttpServletRequest)
            (org.eclipse.jetty.server Request)
            (jakarta.servlet AsyncContext)))
+
+(defprotocol RequestReader
+  (server-port [request])
+  (server-name [request])
+  (remote-addr [request])
+  (uri [request])
+  (query-string [request])
+  (scheme [request])
+  (request-method [request])
+  (protocol [request])
+  (headers [request])
+  (content-type [request])
+  (content-length [request])
+  (character-encoding [request])
+  (ssl-client-cert [request])
+
+  (complete! [request])
+  (set-handled! [request handled?]))
+
+(defprotocol BodyReader
+  (-read-body [request]))
+
+(defprotocol ReadListener
+  (-set-read-listener! [request listener]))
+
+(defprotocol AsyncCtx
+  (async-supported? [request])
+  (async-started? [request])
+  (async-context [request])
+  (start-async [request]))
 
 (defn- get-headers
   "Creates a name/value map of all the request headers."
@@ -29,7 +58,7 @@
     (when (>= length 0) length)))
 
 (extend-type Request
-  p/Request
+  RequestReader
   (server-port [request] (.getServerPort request))
   (server-name [request] (.getServerName request))
   (remote-addr [request] (.getRemoteAddr request))
@@ -44,19 +73,19 @@
   (character-encoding [request] (.getCharacterEncoding request))
   (ssl-client-cert [request] (get-client-cert request))
   (complete! [request]
-    (when (p/async-started? request)
-      (.complete ^AsyncContext (p/async-context request))))
+    (when (async-started? request)
+      (.complete ^AsyncContext (async-context request))))
   (set-handled! [request handled?]
     (.setHandled request handled?))
 
-  p/BodyReader
+  BodyReader
   (read-body [request] (.getInputStream request))
 
-  p/ReadListener
+  ReadListener
   (set-read-listener! [request listener]
     (-> request (.getInputStream) (.setReadListener listener)))
 
-  p/AsyncContext
+  AsyncCtx
   (async-supported? [request] (.isAsyncSupported request))
   (async-started? [request] (.isAsyncStarted request))
   (async-context [request] (.getAsyncContext request))

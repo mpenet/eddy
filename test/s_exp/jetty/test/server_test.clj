@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [s-exp.jetty.http.server :as srv]
             [s-exp.jetty.http.server.response :as rsp]
-            [s-exp.jetty.http.server.protocols :as p]
+            [s-exp.jetty.http.server.request :as req]
             [clj-http.client :as http]
             [s-exp.jetty.http.interceptor.ring1 :as ring1]
             [qbits.auspex :as ax]))
@@ -94,7 +94,7 @@
                 (fn [opts]
                   (srv/create-handler
                    (fn [_ s-request s-response]
-                     (p/set-handled! s-request true)
-                     (p/set-status! s-response 200))))}
+                     (req/set-handled! s-request true)
+                     (rsp/set-status! s-response 200))))}
     (is (-> (http/get "http://localhost:8080")
             :status (= 200)))))

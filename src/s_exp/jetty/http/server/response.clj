@@ -1,19 +1,36 @@
 (ns s-exp.jetty.http.server.response
-  (:require [s-exp.jetty.http.server.protocols :as p]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [qbits.auspex :as ax])
   (:import (java.util.concurrent CompletableFuture)
            (java.nio ByteBuffer)
            (java.nio.channels ReadableByteChannel)
            (org.eclipse.jetty.util Callback)
            (org.eclipse.jetty.server HttpOutput)
-           (jakarta.servlet AsyncContext)
            (org.eclipse.jetty.server Response)
            (java.io OutputStreamWriter File InputStream)))
 
-(extend-type Response
-  p/Response
+(defprotocol ResponseWriter
+  (set-status! [response status])
+  (set-headers! [response headers])
+  (send-error! [response ^Throwable error]))
 
+(defprotocol BodyWriter
+  (set-body! [response body]))
+
+(defprotocol BodyWriterAsync
+  (set-body-async! [response body]))
+
+(defprotocol WriteListener
+  (set-write-listener! [response listener]))
+
+(defprotocol WriteBody
+  (write-body! [body response]))
+
+(defprotocol WriteBodyAsync
+  (write-body-async! [body response]))
+
+(extend-type Response
+  ResponseWriter
   (set-status! [response status]
     (.setStatus response status))
 
@@ -30,18 +47,18 @@
   (send-error! [response e]
     (.sendError response 500 (ex-message e)))
 
-  p/BodyWriter
+  BodyWriter
   (set-body! [response body]
-    (p/write-body! body response))
+    (write-body! body response))
 
-  p/BodyWriterAsync
+  BodyWriterAsync
   (set-body-async! [response body]
-    (p/write-body-async! body response))
+    (write-body-async! body response))
 
   (set-write-listener! [response listener]
     (-> response (.getOutputStream) (.setWriteListener listener))))
 
-(extend-protocol p/WriteBody
+(extend-protocol WriteBody
 
   (Class/forName "[B")
   (write-body! [body ^Response response]
@@ -94,7 +111,7 @@
         (.write writer (str chunk)))
       (.close writer))))
 
-(extend-protocol p/WriteBodyAsync
+(extend-protocol WriteBodyAsync
   InputStream
   (write-body-async! [ios ^Response response]
     (let [cf ^CompletableFuture (ax/future)]
@@ -123,7 +140,7 @@
   (write-body-async! [f ^Response response]
     (let [cf ^CompletableFuture (ax/future)]
       (-> f
-          (ax/fmap (fn [body] (p/write-body-async! body response)))
+          (ax/fmap (fn [body] (write-body-async! body response)))
           (ax/then cf (fn [_] (ax/success! cf nil)))
           (ax/catch (fn [e] (ax/error! cf e))))
       cf))
@@ -133,8 +150,8 @@
 
   String
   (write-body-async! [s response]
-    (p/write-body-async! (ByteBuffer/wrap (.getBytes s "UTF-8"))
-                         response))
+    (write-body-async! (ByteBuffer/wrap (.getBytes s "UTF-8"))
+                       response))
 
   nil
   (write-body-async! [_ ^Response response]

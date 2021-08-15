@@ -2,7 +2,8 @@
   (:require [exoscale.interceptor :as interceptor]
             [exoscale.interceptor.auspex]
             [s-exp.jetty.http.interceptor.ring1 :as ring1]
-            [s-exp.jetty.http.server.protocols :as p]
+            [s-exp.jetty.http.server.request :as request]
+            [s-exp.jetty.http.server.response :as response]
             [clojure.tools.logging :as log])
 
   (:import
@@ -80,9 +81,9 @@
            (interceptor/execute chain))
        (catch Throwable e
          (log/error e "Error handling request")
-         (p/send-error! response e))
+         (response/send-error! response e))
        (finally
-         (p/set-handled! request true))))))
+         (request/set-handled! request true))))))
 
 (defn- create-threadpool
   ^ThreadPool
