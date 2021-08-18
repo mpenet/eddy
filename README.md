@@ -1,4 +1,4 @@
-# lido
+# eddy
 
 Jetty11+ server library (client support might eventually be added later).
 
@@ -16,7 +16,7 @@ Jetty11+ server library (client support might eventually be added later).
 ## Documentation
 
 ## Installation
-<!-- lido is [available on Clojars](https://clojars.org/s-exp/lido). -->
+<!-- eddy is [available on Clojars](https://clojars.org/s-exp/eddy). -->
 
 ## License
 

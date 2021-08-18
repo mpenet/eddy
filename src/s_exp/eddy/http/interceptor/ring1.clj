@@ -1,12 +1,14 @@
-(ns s-exp.lido.http.interceptor.ring1
+(ns s-exp.eddy.http.interceptor.ring1
   "adapted/taken from ring.util.servlet"
   (:require
-   [s-exp.lido.http.server.request :as request]
-   [s-exp.lido.http.server.response :as response]
+   [s-exp.eddy.http.server.request :as request]
+   [s-exp.eddy.http.server.response :as response]
    [exoscale.interceptor :as ix]
-   [s-exp.lido.http.interceptor.ring1 :as ring1]
+   [s-exp.eddy.http.interceptor.ring1 :as ring1]
    [qbits.auspex :as ax])
   (:import (org.eclipse.jetty.server Request Response)
+           (org.eclipse.jetty.websocket.server JettyWebSocketServerContainer
+                                               JettyWebSocketCreator)
            (jakarta.servlet AsyncContext)))
 
 ;;; interceptors
@@ -14,7 +16,7 @@
 (def read-headers
   {:name ::read-request
    :enter
-   (fn [{:as ctx :s-exp.lido.http.server/keys [^Request request]}]
+   (fn [{:as ctx :s-exp.eddy.http.server/keys [^Request request]}]
      (assoc ctx
             :ring1/request
             {:server-port (request/server-port request)
@@ -33,13 +35,13 @@
 
 (def read-body
   {:name ::read-body-sync
-   :enter (fn [{:as ctx :s-exp.lido.http.server/keys [^Request request]}]
+   :enter (fn [{:as ctx :s-exp.eddy.http.server/keys [^Request request]}]
             (assoc-in ctx [:ring1/request :body] (.getInputStream request)))})
 
 (def write-headers
   {:name ::write-response
    :enter (fn [{:as ctx
-                :s-exp.lido.http.server/keys [^Response response]}]
+                :s-exp.eddy.http.server/keys [^Response response]}]
             (let [{:keys [status headers]} (:ring1/response ctx)]
 
               (when (nil? response)
@@ -59,14 +61,14 @@
 (def write-body
   {:name ::write-body
    :enter (fn [{:as ctx
-                :s-exp.lido.http.server/keys [^Response response]}]
+                :s-exp.eddy.http.server/keys [^Response response]}]
             (response/set-body! response (-> ctx :ring1/response :body))
             ctx)})
 
 (def write-body-async
   {:name ::write-body-async
    :enter (fn [{:as ctx
-                :s-exp.lido.http.server/keys [^Response response]}]
+                :s-exp.eddy.http.server/keys [^Response response]}]
             (ax/then (response/set-body-async! response (-> ctx :ring1/response :body))
                      (fn [_] ctx)))})
 
@@ -75,6 +77,17 @@
    :enter (-> (fn [{:as ctx :ring1/keys [handler request]}]
                 (handler request))
               (ix/out [:ring1/response]))})
+
+(def handle-upgrade-request
+  {:name ::ws
+   :enter (fn [{:as ctx ::s-exp.eddy.http.server/keys [request resposne]}]
+            (if-let [ws (-> ctx :ring1/response :websocket)]
+              (let [container (JettyWebSocketServerContainer/getContainer (.getServletContext (:s-exp.eddy.http.server/request ctx)))
+                    (JettyWebSocketCreator.)]
+
+                )
+              ctx)
+            )})
 
 (def handle-request-async
   {:name ::handle-request
@@ -85,9 +98,9 @@
 
 (def init-request
   {:leave (fn [{:as ctx
-                :s-exp.lido.http.server/keys [^Request request]}]
+                :s-exp.eddy.http.server/keys [^Request request]}]
             (request/complete! request))
-   :error (fn [{:s-exp.lido.http.server/keys [^Request request]}
+   :error (fn [{:s-exp.eddy.http.server/keys [^Request request]}
                e]
             (print e)
             (request/complete! request)
@@ -95,7 +108,7 @@
 
 (def init-request-async
   {:enter (fn [{:as ctx
-                :s-exp.lido.http.server/keys [^Request request
+                :s-exp.eddy.http.server/keys [^Request request
                                               async-timeout]}]
             (let [async-ctx (request/start-async request)]
               (when async-timeout

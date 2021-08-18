@@ -1,10 +1,10 @@
-(ns s-exp.lido.test.server-test
+(ns s-exp.eddy.test.server-test
   (:require [clojure.test :refer [deftest is]]
-            [s-exp.lido.http.server :as srv]
-            [s-exp.lido.http.server.response :as rsp]
-            [s-exp.lido.http.server.request :as req]
+            [s-exp.eddy.http.server :as srv]
+            [s-exp.eddy.http.server.response :as rsp]
+            [s-exp.eddy.http.server.request :as req]
             [clj-http.client :as http]
-            [s-exp.lido.http.interceptor.ring1 :as ring1]
+            [s-exp.eddy.http.interceptor.ring1 :as ring1]
             [qbits.auspex :as ax]))
 
 (def ^:dynamic *server* nil)
@@ -18,41 +18,41 @@
          (srv/stop! *server*)))))
 
 (deftest test-simple-get-req
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {})}}
     (is (-> (http/get "http://localhost:8080") :status (= 200)) ))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {:status 200})}}
     (is (-> (http/get "http://localhost:8080") :status (= 200))))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {:status 200 :body "test"})}}
     (is (-> (http/get "http://localhost:8080") :status (= 200))))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {:status 201})}}
     (is (-> (http/get "http://localhost:8080") :status (= 201)))))
 
 (deftest test-simple-post-req
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {})}}
     (is (-> (http/post "http://localhost:8080") :status (= 200)) ))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {:body (:body request)})}}
     (is (-> (http/post "http://localhost:8080"
                        {:body "something"})
             :body (= "something"))))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] {:body (:body request)})}}
     (let [large-body (apply str (range 100000))]
       (is (-> (http/post "http://localhost:8080"
@@ -60,16 +60,16 @@
               :body (= large-body))))))
 
 (deftest async-test
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/chain ring1/async-chain
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/chain ring1/async-chain
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request] (ax/success-future {:status 200}))}}
     (is (-> (http/get "http://localhost:8080")
             :status (= 200))))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/chain ring1/async-chain
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/chain ring1/async-chain
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request]
                                   (ax/success-future {:status 201 :body "test"}))}}
     (is (-> (http/get "http://localhost:8080")
@@ -77,9 +77,9 @@
     (is (-> (http/get "http://localhost:8080")
             :body (= "test"))))
 
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server.interceptor/chain ring1/async-chain
-                :s-exp.lido.http.server.interceptor/ctx
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server.interceptor/chain ring1/async-chain
+                :s-exp.eddy.http.server.interceptor/ctx
                 {:ring1/handler (fn [request]
                                   (ax/success-future {:status 201
                                                       :body (ax/success-future "test async body")}))}}
@@ -89,8 +89,8 @@
             :body (= "test async body")))))
 
 (deftest fast-test
-  (with-server {:s-exp.lido.http.server/join? false
-                :s-exp.lido.http.server/handler
+  (with-server {:s-exp.eddy.http.server/join? false
+                :s-exp.eddy.http.server/handler
                 (fn [opts]
                   (srv/create-handler
                    (fn [_ s-request s-response]

@@ -1,5 +1,5 @@
-(ns s-exp.lido.http.server.request
-  (:require [s-exp.lido.utils :as u])
+(ns s-exp.eddy.http.server.request
+  (:require [s-exp.eddy.utils :as u])
   (:import (jakarta.servlet.http HttpServletRequest)
            (org.eclipse.jetty.server Request)
            (jakarta.servlet AsyncContext)))

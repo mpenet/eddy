@@ -4,7 +4,7 @@
 
 (set! *warn-on-reflection* true)
 
-(def lib 'com.s-exp/lido)
+(def lib 'com.s-exp/eddy)
 (def version (format "1.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
