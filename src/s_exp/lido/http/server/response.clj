@@ -1,4 +1,4 @@
-(ns s-exp.loch.http.server.response
+(ns s-exp.lido.http.server.response
   (:require [clojure.java.io :as io]
             [qbits.auspex :as ax])
   (:import (java.util.concurrent CompletableFuture)
