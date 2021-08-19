@@ -1,4 +1,5 @@
-# eddy
+# eddy [![Clojars Project](https://img.shields.io/clojars/v/com.s-exp/eddy.svg)](https://clojars.org/com.s-exp/eddy) [![cljdoc badge](https://cljdoc.org/badge/com.s-exp/eddy)](https://cljdoc.org/d/com.s-exp/eddy/CURRENT)
+
 
 Jetty11+ server library (client support might eventually be added later).
 
@@ -15,11 +16,11 @@ Jetty11+ server library (client support might eventually be added later).
 
 ## Documentation
 
-
+[![cljdoc badge](https://cljdoc.org/badge/com.s-exp/eddy)](https://cljdoc.org/d/com.s-exp/eddy/CURRENT)
 
 ## Installation
 
-eddy is [available on Clojars](https://clojars.org/s-exp/eddy).
+[![Clojars Project](https://img.shields.io/clojars/v/com.s-exp/eddy.svg)](https://clojars.org/com.s-exp/eddy)
 
 ## License
 
