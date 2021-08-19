@@ -78,17 +78,6 @@
                 (handler request))
               (ix/out [:ring1/response]))})
 
-(def handle-upgrade-request
-  {:name ::ws
-   :enter (fn [{:as ctx ::s-exp.eddy.http.server/keys [request resposne]}]
-            (if-let [ws (-> ctx :ring1/response :websocket)]
-              (let [container (JettyWebSocketServerContainer/getContainer (.getServletContext (:s-exp.eddy.http.server/request ctx)))
-                    (JettyWebSocketCreator.)]
-
-                )
-              ctx)
-            )})
-
 (def handle-request-async
   {:name ::handle-request
    :enter (-> (fn [{:as _ctx :ring1/keys [handler request]}]
