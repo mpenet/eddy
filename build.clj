@@ -5,7 +5,7 @@
 (set! *warn-on-reflection* true)
 
 (def lib 'com.s-exp/eddy)
-(def version (format "1.0.%s" (b/git-count-revs nil)))
+(def version (format "1.0.0-alpha%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
@@ -16,6 +16,7 @@
   (b/write-pom {:class-dir class-dir
                 :lib lib
                 :version version
+                ;; :scm {:tag (str "v" version)}
                 :basis basis
                 :src-dirs ["src"]})
   (b/copy-dir {:src-dirs ["src" "resources"]
@@ -25,41 +26,30 @@
   [_]
   (b/delete {:path "target"}))
 
-(defn jar
-  [{:keys [env] :as params}]
-  (let [srcs (if (= env :dev) (cons "dev-resources" copy-srcs) copy-srcs)]
-    (b/write-pom {:class-dir class-dir
-                  :lib lib
-                  :version version
-                  :basis basis
-                  :src-dirs ["src"]})
-    (b/copy-dir {:src-dirs srcs
-                 :target-dir class-dir})
-    (b/jar {:class-dir class-dir
-            :jar-file jar-file})
-    params))
+(defn clean "Remove the target folder." [_]
+  (println "\nCleaning target...")
+  (b/delete {:path "target"}))
 
-(defn uber
-  [_]
-  (b/compile-clj {:basis basis
-                  :src-dirs ["src"]
-                  :class-dir class-dir})
-  (b/uber {:class-dir class-dir
-           :uber-file uber-file
-           :basis basis}))
+(defn jar "Build the library JAR file." [_]
+  (println "\nWriting pom.xml...")
+  (b/write-pom {:class-dir class-dir
+                :lib lib
+                :version version
+                :scm {:tag (str "v" version)}
+                :basis basis
+                :src-dirs ["src"]})
+  (println "Copying src...")
+  (b/copy-dir {:src-dirs ["src"]
+               :target-dir class-dir})
+  (println (str "Building jar " jar-file "..."))
+  (b/jar {:class-dir class-dir
+          :jar-file jar-file}))
 
 (defn compile
   [_]
   (b/compile-clj {:basis basis
                   :src-dirs ["src"]
                   :class-dir class-dir}))
-
-(defn all
-  [_]
-  (clean nil)
-  (prep nil)
-  (compile nil)
-  (uber nil))
 
 ;; clj -T:build clean
 ;; clj -T:build prep

@@ -1,4 +1,4 @@
-{:deps {org.clojure/clojure {:mvn/version "1.10.2"}
+{:deps {org.clojure/clojure {:mvn/version "1.10.3"}
         org.eclipse.jetty/jetty-server {:mvn/version "11.0.6"}
         org.eclipse.jetty.http2/http2-server {:mvn/version "11.0.6"}
         org.eclipse.jetty/jetty-alpn-server {:mvn/version "11.0.6"}
@@ -11,6 +11,7 @@
 
  :aliases {:build {:deps {io.github.clojure/tools.build {:sha "98c1e8eb3ae2c2477136084be5636b61f38738f7"}}
                    :ns-default build}
+
            :test
            {:extra-paths ["test"]
             :extra-deps {org.clojure/test.check {:mvn/version "1.1.0"}
@@ -18,4 +19,13 @@
                          {:git/url "https://github.com/cognitect-labs/test-runner"
                           :sha "62ef1de18e076903374306060ac0e8a752e57c86"}
                          clj-http/clj-http {:mvn/version "3.12.3"}}
-            :exec-fn cognitect.test-runner.api/test}}}
+            :exec-fn cognitect.test-runner.api/test}
+
+           :deploy
+           {:deps {slipset/deps-deploy
+                   {:git/url "https://github.com/slipset/deps-deploy"
+                    :sha "b4359c5d67ca002d9ed0c4b41b710d7e5a82e3bf"}}
+            :exec-fn deps-deploy.deps-deploy/deploy
+            :exec-args {:installer :remote
+                        ;; :artifact "target/eddy-1.0.0-alpha18.jar"
+                        :pom-file "target/classes/META-INF/maven/com.s-exp/eddy/pom.xml"}}}}

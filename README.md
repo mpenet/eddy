@@ -15,8 +15,11 @@ Jetty11+ server library (client support might eventually be added later).
 
 ## Documentation
 
+
+
 ## Installation
-<!-- eddy is [available on Clojars](https://clojars.org/s-exp/eddy). -->
+
+eddy is [available on Clojars](https://clojars.org/s-exp/eddy).
 
 ## License
 
