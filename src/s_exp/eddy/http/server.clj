@@ -7,18 +7,16 @@
             [clojure.tools.logging :as log])
 
   (:import
-   (jakarta.servlet.http HttpServletResponse
-                         HttpServletRequest)
-   (org.eclipse.jetty.server  Server
-                              Request
-                              Response
-                              HttpConnectionFactory
-                              SslConnectionFactory
-                              SecureRequestCustomizer
-                              ServerConnector
-                              HttpConfiguration
-                              HttpConnectionFactory
-                              ConnectionFactory)
+   (org.eclipse.jetty.server Server
+                             Request
+                             Response
+                             HttpConnectionFactory
+                             SslConnectionFactory
+                             SecureRequestCustomizer
+                             ServerConnector
+                             HttpConfiguration
+                             HttpConnectionFactory
+                             ConnectionFactory)
    (org.eclipse.jetty.alpn.server ALPNServerConnectionFactory)
    (org.eclipse.jetty.http2.server HTTP2CServerConnectionFactory HTTP2ServerConnectionFactory)
    (org.eclipse.jetty.server.handler AbstractHandler)
@@ -34,21 +32,21 @@
   (merge
    #:s-exp.eddy.http.server{:join? true}
    #:s-exp.eddy.http.server.interceptor{:chain ring1/chain
-                                         :ctx {}}
+                                        :ctx {}}
    #:s-exp.eddy.http.server.threadpool{:daemon? false
-                                        :max-threads 50
-                                        :min-threads 8
-                                        :max-queued-requests Integer/MAX_VALUE
-                                        :idle-timeout 60000}
+                                       :max-threads 50
+                                       :min-threads 8
+                                       :max-queued-requests Integer/MAX_VALUE
+                                       :idle-timeout 60000}
    #:s-exp.eddy.http.server.http-config{:secure-scheme "https"
-                                         :output-buffer-size 32768
-                                         :request-header-size 8192
-                                         :response-header-size 8192
-                                         :send-server-version? false
-                                         :send-date-header? false
-                                         :header-cache-size 512}
+                                        :output-buffer-size 32768
+                                        :request-header-size 8192
+                                        :response-header-size 8192
+                                        :send-server-version? false
+                                        :send-date-header? false
+                                        :header-cache-size 512}
    #:s-exp.eddy.http.server.http-connector{:port 8080
-                                            :max-idle-time 200000}
+                                           :max-idle-time 200000}
    #:s-exp.eddy.http.server.ssl-connector{:max-idle-time 200000}
    #:s-exp.eddy.ssl-context-factory{}))
 
@@ -56,7 +54,7 @@
   [ctx request response]
   (into ctx
         #:s-exp.eddy.http.server{:request request
-                                  :response response}))
+                                 :response response}))
 
 (defn create-handler
   [f]
@@ -88,8 +86,8 @@
 (defn- create-threadpool
   ^ThreadPool
   [{:s-exp.eddy.http.server.threadpool/keys [max-threads min-threads
-                                              idle-timeout daemon?
-                                              max-queued-requests]}]
+                                             idle-timeout daemon?
+                                             max-queued-requests]}]
   (let [queue-max-capacity (max max-queued-requests 8)
         queue-capacity (min (max min-threads 8)
                             queue-max-capacity)
@@ -144,6 +142,7 @@
       :need (.setNeedClientAuth context-server true)
       :want (.setWantClientAuth context-server true)
       nil)
+
     (when-let [exclude-ciphers exclude-ciphers]
       (let [ciphers (into-array String exclude-ciphers)]
         (if replace-exclude-ciphers?
@@ -160,7 +159,7 @@
   ^ServerConnector
   [^Server server factories]
   (ServerConnector. server
-                    #^"[Lorg.eclipse.jetty.server.ConnectionFactory;"
+                    ^"[Lorg.eclipse.jetty.server.ConnectionFactory;"
                     (into-array ConnectionFactory factories)))
 
 (defn- ^ServerConnector ssl-connector

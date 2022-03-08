@@ -1,10 +1,10 @@
-{:deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        org.eclipse.jetty/jetty-server {:mvn/version "11.0.6"}
-        org.eclipse.jetty.http2/http2-server {:mvn/version "11.0.6"}
-        org.eclipse.jetty/jetty-alpn-server {:mvn/version "11.0.6"}
-        org.eclipse.jetty.websocket/websocket-jetty-server {:mvn/version "11.0.6"}
+{:deps {org.clojure/clojure {:mvn/version "1.11.0-rc1"}
+        org.eclipse.jetty/jetty-server {:mvn/version "11.0.8"}
+        org.eclipse.jetty.http2/http2-server {:mvn/version "11.0.8"}
+        org.eclipse.jetty/jetty-alpn-server {:mvn/version "11.0.8"}
+        org.eclipse.jetty.websocket/websocket-jetty-server {:mvn/version "11.0.8"}
         exoscale/interceptor {:mvn/version "0.1.9"}
-        cc.qbits/auspex {:mvn/version "1.0.0-alpha7"}
+        cc.qbits/auspex {:mvn/version "1.0.0-alpha8"}
         org.clojure/tools.logging {:mvn/version "1.1.0"}}
 
  :paths ["src"]
@@ -27,5 +27,5 @@
                     :sha "b4359c5d67ca002d9ed0c4b41b710d7e5a82e3bf"}}
             :exec-fn deps-deploy.deps-deploy/deploy
             :exec-args {:installer :remote
-                        ;; :artifact "target/eddy-1.0.0-alpha18.jar"
+                        :artifact "target/eddy-1.0.0-alpha19.jar"
                         :pom-file "target/classes/META-INF/maven/com.s-exp/eddy/pom.xml"}}}}
